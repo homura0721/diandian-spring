@@ -18,6 +18,8 @@ public class Channel {
 	private String quality;
 	private String url;
 	private List<Comment> comments;
+	private String cover;  //频道封面图片
+	
 	
 	public List<Comment> getComments() {
 		return comments;
@@ -37,7 +39,12 @@ public class Channel {
 	}
 	
 	
-	
+	public String getCover() {
+		return cover;
+	}
+	public void setCover(String cover) {
+		this.cover = cover;
+	}
 	public String getId() {
 		return id;
 	}

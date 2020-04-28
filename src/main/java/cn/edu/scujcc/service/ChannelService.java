@@ -2,14 +2,21 @@ package cn.edu.scujcc.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+
+import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import ch.qos.logback.classic.Logger;
+
+import cn.edu.scujcc.api.ChannelController;
 import cn.edu.scujcc.dao.ChannelRepository;
 import cn.edu.scujcc.model.Channel;
 import cn.edu.scujcc.model.Comment;
@@ -24,6 +31,7 @@ import cn.edu.scujcc.model.Comment;
 public class ChannelService {
 	@Autowired
 	private ChannelRepository repo;
+	private static final Logger logger = (Logger) LoggerFactory.getLogger(ChannelService.class);
 	
 	
 	/**
@@ -91,6 +99,9 @@ public class ChannelService {
 			}else {
 				saved.setComments(c.getComments());
 			}
+			if(c.getCover() !=null) {
+				saved.setCover(c.getCover());
+			}
 		}
 		return repo.save(saved);
 	}
@@ -132,5 +143,37 @@ public class ChannelService {
 			return repo.save(saved);
 		}
 		return null;
+	}
+	
+	/**
+	 * 返回指定频道的热门评论
+	 * @param channelId 指定频道的编号
+	 * @return 热门评论的列表
+	 */
+	public List<Comment> hotComments(String channelId){
+		List<Comment> result = new ArrayList<>();
+		Channel saved = getChannel(channelId);
+		logger.debug("频道"+channelId+"的数据"+saved);
+		if(saved != null && saved.getComments() != null) {
+			//根据评论的star进行排序
+			saved.getComments().sort(new Comparator<Comment>() {
+				@Override
+				public int compare(Comment o1, Comment o2) {
+					if (o1.getStar() == o2.getStar()) {
+						return 0;
+					}else if(o1.getStar() < o2.getStar()) {
+						return 1;
+					}else {
+						return -1;
+					}					
+				}								
+			});
+			if (saved.getComments().size()>3) {
+				result = saved.getComments().subList(0, 3);
+			}else {
+				result = saved.getComments();
+			}
+		}
+		return result;
 	}
 }

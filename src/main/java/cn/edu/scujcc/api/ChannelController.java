@@ -105,5 +105,18 @@ public class ChannelController {
 		logger.debug("将为频道"+channelId+"新增一条评论："+comment);
 		//把评论保存到数据库
 		service.addComment(channelId, comment);
-	}	
+	}
+	
+	/**
+	 *  获取制定品论的热门评论（前3条）
+	 * @param channelId 制定的频道编号
+	 * @return 3条热门评论的列表（数组）
+	 */
+	@GetMapping("/{channelId}/hotcomments")
+	public List<Comment> hotComments(@PathVariable String channelId ){
+		logger.debug("将获取频道"+channelId+"的热门评论...");
+		//TODO 从数据库
+		return service.hotComments(channelId);
+	}
+	
 }
