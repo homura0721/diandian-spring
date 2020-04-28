@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import cn.edu.scujcc.model.Channel;
+import cn.edu.scujcc.model.Comment;
 import cn.edu.scujcc.service.ChannelService;
 
 @RestController
@@ -81,17 +82,28 @@ public class ChannelController {
 	}	
 	
 	@GetMapping("/t/{title}")
-	public List<Channel> chazhaotitle(@PathVariable String title){
-		return service.chazhaotitle(title);
+	public List<Channel> searchtitle(@PathVariable String title){
+		return service.searchtitle(title);
 	}
 	
 	@GetMapping("/q/{quality}")
-	public List<Channel> chazhaoquality(@PathVariable String quality){
-		return service.chazhaoquality(quality);
+	public List<Channel> searchquality(@PathVariable String quality){
+		return service.searchquality(quality);
 	}
 	
 	@GetMapping("/hot")
 	public List<Channel> getHotChannels(){
 		return service.getLatesCommentsChannel();
 	}
+	/**
+	 * 新增评论
+	 * chanelId 被评论的频道编号
+	 * comment 将要新增的评论对象	
+	 */
+	@PostMapping("/{channelId}/comment")
+	public void addComment(@PathVariable String channelId,@RequestBody Comment comment) {
+		logger.debug("将为频道"+channelId+"新增一条评论："+comment);
+		//把评论保存到数据库
+		service.addComment(channelId, comment);
+	}	
 }

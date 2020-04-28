@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import ch.qos.logback.classic.Logger;
 import cn.edu.scujcc.dao.ChannelRepository;
 import cn.edu.scujcc.model.Channel;
+import cn.edu.scujcc.model.Comment;
 
 /**
  * 
@@ -101,10 +102,10 @@ public class ChannelService {
 	//public List<Channel> search(String title, String quality){
 	//	return repo.findByTitleAndQuality(title, quality);
 	//}
-	public List<Channel> chazhaotitle(String title){
+	public List<Channel> searchtitle(String title){
 		return repo.findByTitle(title);
 	}
-	public List<Channel> chazhaoquality(String quality){
+	public List<Channel> searchquality(String quality){
 		return repo.findByQuality(quality);
 	}
 	
@@ -117,5 +118,19 @@ public class ChannelService {
 		LocalDateTime today = LocalDateTime.of(now.getYear(),now.getMonthValue(),now.getDayOfMonth(),0,0);
 		return repo.findByCommentsDtAfter(today);
 	}
-
+	
+	/**
+	 * 想指定的频道添加一条评论
+	 * @param channelId 指定的评论编号
+	 * @param comment	将要新增的评论对象
+	 * @return
+	 */
+	public Channel addComment(String channelId, Comment comment) {
+		Channel saved = getChannel(channelId);
+		if(saved != null) {
+			saved.addComment(comment);
+			return repo.save(saved);
+		}
+		return null;
+	}
 }
