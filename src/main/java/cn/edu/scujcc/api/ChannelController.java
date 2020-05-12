@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,11 +30,12 @@ public class ChannelController {
 	private static final Logger logger = LoggerFactory.getLogger(ChannelController.class);
 
 
-	private static final String String = null;
-
 	
 	@Autowired
 	private ChannelService service;
+	
+	private CacheManager cacheManager;
+	
 	
 	@GetMapping
 	public List<Channel> getAllChannels(){
@@ -46,18 +49,28 @@ public class ChannelController {
 	
 	@GetMapping("/{id}")
 	public Channel getChannel(@PathVariable String id) {
-		Channel c = service.getChannel(id);
-		if(c != null) {
-			return c;
-		}else {
-			logger.error("找不到指定的频道");
+		logger.info("正在读取频道"+id);
+		//检查登录的标志是否存在
+		Cache cache = cacheManager.getCache("users");
+		Object token = cache.get("token");
+		if(token != null) {
+			logger.debug("当前已登录用户是："+ token);
+			Channel c = service.getChannel(id);
+			if(c != null) {
+				return c;
+			}else {
+				logger.error("找不到指定的频道");
+				return null;
+			}
+		} else {
+			//未登录，拒绝访问
 			return null;
-		}
+		}		
 	}
 	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<String> deleteChannel(@PathVariable String id){
-		System.out.println("即将删除频道, id=" +id);
+		logger.debug("即将删除频道, id=" +id);
 		boolean result = service.deleteChannel(id);
 		if(result) {
 			return ResponseEntity.ok().body("删除成功");
@@ -69,14 +82,14 @@ public class ChannelController {
 	
 	@PostMapping
 	public Channel createChannel(@RequestBody Channel c) {
-		System.out.println("即将新建频道，频道数据："+ c);
+		logger.debug("即将新建频道，频道数据："+ c);
 		Channel saved = service.createChannel(c);
 		return saved;
 	}
 	
 	@PutMapping
 	public Channel updateChannel(@RequestBody Channel c) {
-		System.out.println("即将更新频道，频道数据："+ c);
+		logger.debug("即将更新频道，频道数据："+ c);
 		Channel updated = service.updateChannel(c);
 		return updated;
 	}	
@@ -108,7 +121,7 @@ public class ChannelController {
 	}
 	
 	/**
-	 *  获取制定品论的热门评论（前3条）
+	 *  获取指定评论的热门评论（前3条）
 	 * @param channelId 制定的频道编号
 	 * @return 3条热门评论的列表（数组）
 	 */

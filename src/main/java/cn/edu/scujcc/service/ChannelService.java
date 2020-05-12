@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -39,7 +40,9 @@ public class ChannelService {
 	 * @param id
 	 * @return
 	 */
+	@Cacheable("channels")
 	public List<Channel> getAllChannels() {
+		logger.debug("准备从数据库读取所有频道信息");
 		return repo.findAll();
 	}
 	/**
