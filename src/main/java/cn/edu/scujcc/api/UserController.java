@@ -52,8 +52,8 @@ public class UserController {
 			result.setStatus(Response.STATUS_OK);
 			result.setData(saved);
 			//写登录成功的标志
-			Cache cache = cacheManager.getCache("users");
-			cache.put("token", username);
+			//Cache cache = cacheManager.getCache("users");
+			//cache.put("token", username);
 		}else {
 			//登录失败
 			logger.error("用户已存在，不能注册。");
@@ -62,8 +62,6 @@ public class UserController {
 		}
 		return result;
 	}
-	
-	
 	
 	
 	
