@@ -116,10 +116,10 @@ public class ChannelService {
 	//public List<Channel> search(String title, String quality){
 	//	return repo.findByTitleAndQuality(title, quality);
 	//}
-	public List<Channel> searchtitle(String title){
+	public List<Channel> searchTitle(String title){
 		return repo.findByTitle(title);
 	}
-	public List<Channel> searchquality(String quality){
+	public List<Channel> searchQuality(String quality){
 		return repo.findByQuality(quality);
 	}
 	

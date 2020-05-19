@@ -17,56 +17,59 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import cn.edu.scujcc.model.Channel;
 import cn.edu.scujcc.model.Comment;
 import cn.edu.scujcc.service.ChannelService;
+import cn.edu.scujcc.service.UserService;
 
 @RestController
 @RequestMapping("/channel")
 public class ChannelController {
 	private static final Logger logger = LoggerFactory.getLogger(ChannelController.class);
 
-
-	
+	@Autowired
+	private UserService userService;
 	@Autowired
 	private ChannelService service;
-	
+	@Autowired
 	private CacheManager cacheManager;
 	
 	
 	@GetMapping
-	public List<Channel> getAllChannels(){
-		logger.info("正在查找所有频道信息");
+	public List<Channel> getAllChannels(@RequestHeader("token") String token){
+		logger.info("正在查找所有频道信息,token="+token);
+		String user = userService.currentUser(token);
+		logger.info("当前用户是："+ user);
 		List<Channel> results = service.getAllChannels();
 		logger.debug("所有频道的数量是"+results.size());
 		
 		return results;		
 	}
 	
-	
+	/**
+	 * 读取频道前必须先登录
+	 * @param id
+	 * @param token
+	 * @return
+	 */
 	@GetMapping("/{id}")
-	public Channel getChannel(@PathVariable String id) {
-		logger.info("正在读取频道"+id);
-		//检查登录的标志是否存在
-		Cache cache = cacheManager.getCache("users");
-		Object token = cache.get("token");
-		if(token != null) {
-			logger.debug("当前已登录用户是："+ token);
-			Channel c = service.getChannel(id);
-			if(c != null) {
-				return c;
-			}else {
-				logger.error("找不到指定的频道");
-				return null;
-			}
+	public Channel getChannel(@PathVariable String id, @RequestHeader("token") String token) {
+		logger.info("正在读取频道"+token);
+		String user = userService.currentUser(token);
+		logger.debug("当前已登录用户是："+ user);
+		Channel c = service.getChannel(id);
+		if (c != null) {
+			return c;
 		} else {
-			//未登录，拒绝访问
+			logger.error("找不到指定的频道");
 			return null;
 		}		
-	}
+	}		
+	
 	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<String> deleteChannel(@PathVariable String id){
@@ -95,13 +98,13 @@ public class ChannelController {
 	}	
 	
 	@GetMapping("/t/{title}")
-	public List<Channel> searchtitle(@PathVariable String title){
-		return service.searchtitle(title);
+	public List<Channel> searchTitle(@PathVariable String title){
+		return service.searchTitle(title);
 	}
 	
 	@GetMapping("/q/{quality}")
-	public List<Channel> searchquality(@PathVariable String quality){
-		return service.searchquality(quality);
+	public List<Channel> searchQuality(@PathVariable String quality){
+		return service.searchQuality(quality);
 	}
 	
 	@GetMapping("/hot")
@@ -114,10 +117,14 @@ public class ChannelController {
 	 * comment 将要新增的评论对象	
 	 */
 	@PostMapping("/{channelId}/comment")
-	public void addComment(@PathVariable String channelId,@RequestBody Comment comment) {
-		logger.debug("将为频道"+channelId+"新增一条评论："+comment);
+	public Channel addComment(@RequestHeader("token") String token, @PathVariable String channelId,@RequestBody Comment comment) {
+		Channel result = null;
+		String username = userService.currentUser(token);
+		comment.setAuthor(username);
+		logger.debug(username + "即将评论频道" + channelId+ "评论对象：" + comment);
 		//把评论保存到数据库
-		service.addComment(channelId, comment);
+		result = service.addComment(channelId, comment);
+		return result;
 	}
 	
 	/**

@@ -18,6 +18,7 @@ public class User implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 8425746230705180748L;
+	public static final String CACHE_NAME = "users";
 	@Id
 	private String id;
 	private String username;

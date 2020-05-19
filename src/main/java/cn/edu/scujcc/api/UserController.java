@@ -45,15 +45,14 @@ public class UserController {
 	
 	@GetMapping("/login/{username}/{password}")
 	public Response login(@PathVariable("username") String username, @PathVariable("password") String password) {
-		Response result = new Response();
+		Response<String> result = new Response();
 		User saved = service.login(username, password);
 		if (saved != null) {
 			//登录成功
+			String uid = service.checkIn(username);
 			result.setStatus(Response.STATUS_OK);
-			result.setData(saved);
-			//写登录成功的标志
-			//Cache cache = cacheManager.getCache("users");
-			//cache.put("token", username);
+			result.setData(uid);
+			result.setMessage("登录成功");
 		}else {
 			//登录失败
 			logger.error("用户已存在，不能注册。");

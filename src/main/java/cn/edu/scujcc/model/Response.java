@@ -2,7 +2,7 @@ package cn.edu.scujcc.model;
 
 import java.io.Serializable;
 
-public class Response implements Serializable{
+public class Response<T> implements Serializable{
 	/**
 	 * 
 	 */
@@ -12,7 +12,7 @@ public class Response implements Serializable{
 	
 	private int status;
 	private String message;
-	private User data;
+	private T data;
 	
 	
 	public int getStatus() {
@@ -27,10 +27,10 @@ public class Response implements Serializable{
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	public User getData() {
+	public T getData() {
 		return data;
 	}
-	public void setData(User data) {
+	public void setData(T data) {
 		this.data = data;
 	}
 	
