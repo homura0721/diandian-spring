@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cn.edu.scujcc.model.Channel;
 import cn.edu.scujcc.model.Comment;
+import cn.edu.scujcc.model.Result;
 import cn.edu.scujcc.service.ChannelService;
 import cn.edu.scujcc.service.UserService;
 
@@ -40,14 +41,24 @@ public class ChannelController {
 	
 	
 	@GetMapping
+	/*
 	public List<Channel> getAllChannels(@RequestHeader("token") String token){
 		logger.info("正在查找所有频道信息,token="+token);
 		String user = userService.currentUser(token);
 		logger.info("当前用户是："+ user);
 		List<Channel> results = service.getAllChannels();
 		logger.debug("所有频道的数量是"+results.size());
-		
 		return results;		
+	}
+	*/
+	public Result<List<Channel>> getAllChannels() {
+		logger.info("正在读取所有频道信息!!!");
+		Result<List<Channel>> result = new Result<List<Channel>>();
+		List<Channel> channels = service.getAllChannels();
+		result = result.ok();
+		result.setData(channels);
+		logger.debug("所有频道的数量是"+channels.size());
+		return result;
 	}
 	
 	/**
@@ -57,7 +68,8 @@ public class ChannelController {
 	 * @return
 	 */
 	@GetMapping("/{id}")
-	public Channel getChannel(@PathVariable String id, @RequestHeader("token") String token) {
+	/*
+	public Channel getChannel(@PathVariable String id,@RequestHeader("token") String token) {
 		logger.info("正在读取频道"+token);
 		String user = userService.currentUser(token);
 		logger.debug("当前已登录用户是："+ user);
@@ -67,40 +79,96 @@ public class ChannelController {
 		} else {
 			logger.error("找不到指定的频道");
 			return null;
-		}		
-	}		
+		}	
+	}
+	*/
+	public Result<Channel> getChannel(@PathVariable String id) {
+		logger.info("正在读取频道："+id);
+		Result<Channel> result = new Result<>();
+		Channel c = service.getChannel(id);
+		if (c != null) {
+			result = result.ok();
+			result.setData(c);
+		} else {
+			logger.error("找不到指定的频道。");
+			result = result.error();
+			result.setMessage("找不到指定的频道。");
+		}
+		return result;
+	}
 	
 	
+	
+	
+	/**
+	 * 删除频道
+	 * @param id
+	 * @return
+	 */
 	@DeleteMapping("/{id}")
-	public ResponseEntity<String> deleteChannel(@PathVariable String id){
+	/*public ResponseEntity<String> deleteChannel(@PathVariable String id){
 		logger.debug("即将删除频道, id=" +id);
 		boolean result = service.deleteChannel(id);
 		if(result) {
 			return ResponseEntity.ok().body("删除成功");
 		}else {
 			return ResponseEntity.ok().body("删除失败");
+		}	
+	}
+	*/
+	public Result<Channel> deleteChannel(@PathVariable String id) {
+		logger.info("即将删除频道，id="+id);
+		Result<Channel> result = new Result<>();
+		boolean del = service.deleteChannel(id);
+		if (del) {
+			result = result.ok();
+		} else {
+			result.setStatus(Result.STATUS_ERROR);
+			result.setMessage("删除失败");
 		}
+		return result;
 	}
 	
 	
 	@PostMapping
-	public Channel createChannel(@RequestBody Channel c) {
+	/*public Channel createChannel(@RequestBody Channel c) {
 		logger.debug("即将新建频道，频道数据："+ c);
 		Channel saved = service.createChannel(c);
 		return saved;
 	}
+	*/
+	public Result<Channel> createChannel(@RequestBody Channel c) {
+		logger.info("即将新建频道，频道数据：" + c);
+		Result<Channel> result = new Result<>();
+		Channel saved= service.createChannel(c);
+		//result = result.ok();
+		result.setData(saved);
+		return result;
+	}
 	
 	@PutMapping
+	/*
 	public Channel updateChannel(@RequestBody Channel c) {
 		logger.debug("即将更新频道，频道数据："+ c);
 		Channel updated = service.updateChannel(c);
 		return updated;
-	}	
+	}
+	*/
+	public Result<Channel> updateChannel(@RequestBody Channel c) {
+		logger.debug("即将更新频道：频道数据：" + c);
+		Result<Channel> result = new Result<>();
+		Channel updated = service.updateChannel(c);
+		result = result.ok();
+		result.setData(updated);
+		return result;
+	}
 	
 	@GetMapping("/t/{title}")
 	public List<Channel> searchTitle(@PathVariable String title){
 		return service.searchTitle(title);
 	}
+
+	
 	
 	@GetMapping("/q/{quality}")
 	public List<Channel> searchQuality(@PathVariable String quality){
@@ -133,10 +201,19 @@ public class ChannelController {
 	 * @return 3条热门评论的列表（数组）
 	 */
 	@GetMapping("/{channelId}/hotcomments")
+	/*
 	public List<Comment> hotComments(@PathVariable String channelId ){
 		logger.debug("将获取频道"+channelId+"的热门评论...");
 		//TODO 从数据库
 		return service.hotComments(channelId);
+	}
+	*/
+	public Result<List<Comment>> hotComments(@PathVariable String channelId) {
+		Result<List<Comment>> result = new Result<List<Comment>>();
+		logger.debug("获取频道"+channelId+"的热门评论...");
+		result = result.ok();
+		result.setData(service.hotComments(channelId));
+		return result;
 	}
 	
 }

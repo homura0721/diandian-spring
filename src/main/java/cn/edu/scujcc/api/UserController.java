@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import cn.edu.scujcc.UserExistException;
-import cn.edu.scujcc.model.Response;
+import cn.edu.scujcc.model.Result;
 import cn.edu.scujcc.model.User;
 import cn.edu.scujcc.service.UserService;
 
@@ -28,35 +28,35 @@ public class UserController {
 	private CacheManager cacheManager;
 	
 	@PostMapping("/register")
-	public Response register(@RequestBody User u) {
-		Response result = new Response();
+	public Result<User> register(@RequestBody User u) {
+		Result<User> result = new Result<>();
 		logger.debug("用户注册："+u);
 		try {
 			User saved = service.register(u);
-			result.setStatus(Response.STATUS_OK);
+			result.setStatus(Result.STATUS_OK);
 			result.setData(saved);
 		} catch (UserExistException e) {
 			logger.error("用户已存在，不能注册。");			
-			result.setStatus(Response.STATUS_ERROR);
+			result.setStatus(Result.STATUS_ERROR);
 			result.setMessage("用户已存在，不能注册。");
 		}
 		return result;
 	}
 	
 	@GetMapping("/login/{username}/{password}")
-	public Response login(@PathVariable("username") String username, @PathVariable("password") String password) {
-		Response<String> result = new Response();
+	public Result<String> login(@PathVariable("username") String username, @PathVariable("password") String password) {
+		Result<String> result = new Result();
 		User saved = service.login(username, password);
 		if (saved != null) {
 			//登录成功
 			String uid = service.checkIn(username);
-			result.setStatus(Response.STATUS_OK);
+			result.setStatus(Result.STATUS_OK);
 			result.setData(uid);
 			result.setMessage("登录成功");
 		}else {
 			//登录失败
 			logger.error("用户已存在，不能注册。");
-			result.setStatus(Response.STATUS_ERROR);
+			result.setStatus(Result.STATUS_ERROR);
 			result.setMessage("密码错误");
 		}
 		return result;

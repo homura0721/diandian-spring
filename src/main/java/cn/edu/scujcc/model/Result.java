@@ -2,7 +2,7 @@ package cn.edu.scujcc.model;
 
 import java.io.Serializable;
 
-public class Response<T> implements Serializable{
+public class Result<T> implements Serializable{
 	/**
 	 * 
 	 */
@@ -34,5 +34,19 @@ public class Response<T> implements Serializable{
 		this.data = data;
 	}
 	
+	
+	public Result<T> ok() {
+		Result<T> result = new Result<>();
+		result.setStatus(STATUS_OK);
+		result.setMessage("操作成功");
+		return result;
+	}
+
+	public Result<T> error() {
+		Result<T> result = new Result<>();
+		result.setStatus(STATUS_ERROR);
+		result.setMessage("操作失败");
+		return result;
+	}
 	
 }
